@@ -10,6 +10,13 @@
 
 set -euo pipefail
 
+for cmd in docker git; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Не найден '$cmd' на хосте. Установи его и запусти скрипт заново."
+    exit 1
+  fi
+done
+
 REPO_URL="https://github.com/OneDimon/n8n-nodes-gemini-proxy.git"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
@@ -71,9 +78,13 @@ echo "==> Клонирую репозиторий..."
 git clone --depth 1 "$REPO_URL" "$TMP_DIR/n8n-nodes-gemini-proxy"
 cd "$TMP_DIR/n8n-nodes-gemini-proxy"
 
-echo "==> Устанавливаю зависимости и собираю..."
-npm install --no-audit --no-fund
-npm run build
+echo "==> Собираю пакет (npm install + build) внутри временного контейнера node:20-alpine,"
+echo "    т.к. на хосте npm может быть не установлен..."
+docker run --rm \
+  -v "$TMP_DIR/n8n-nodes-gemini-proxy:/work" \
+  -w /work \
+  node:20-alpine \
+  sh -c "npm install --no-audit --no-fund && npm run build"
 
 echo "==> Копирую иконку рядом со скомпилированной нодой..."
 mkdir -p dist/nodes/LmChatGeminiProxy
