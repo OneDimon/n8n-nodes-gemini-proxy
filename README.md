@@ -24,6 +24,31 @@ MVP для локального теста на собственном n8n. Не
 
 
 
+## Установка одной командой (Docker)
+
+Если n8n запущен в Docker, на сервере выполни:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash -s -- <имя_контейнера_n8n>
+```
+
+Например, если контейнер называется `n8n`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash -s -- n8n
+```
+
+Скрипт сам: клонирует репозиторий → ставит зависимости → собирает TypeScript в JS →
+копирует результат в `/home/node/.n8n/custom/` внутри контейнера → ставит туда
+рантайм-зависимости (axios, proxy-agent) → перезапускает контейнер.
+
+После этого в поиске нод в n8n UI появится **"Gemini Chat Model (Proxy)"** — ничего
+руками собирать не нужно.
+
+⚠️ Имей в виду: `docker restart` оборвёт все текущие выполняющиеся workflow в этот момент.
+
+## Установка вручную (по шагам)
+
 ## 1. Установка зависимостей и сборка (на твоём VPS или локально)
 
 ```bash
