@@ -111,12 +111,12 @@ docker restart <container>
 
 ## 4. Известные упрощения (на стадии MVP, не для прода)
 
+- Tool calling реализован (`bindTools` + `functionCall`/`functionResponse`),
+  но не покрыт тестами на сложных многошаговых / параллельных вызовах инструментов.
 - Нет streaming (`streamGenerateContent`) — только обычный `generateContent`.
-- История переписки сворачивается в простую user/model последовательность,
-  без полноценной поддержки multi-turn function calling / tool calls.
 - Нет автоматического маппинга ошибок Google API в человекочитаемые сообщения n8n.
 - Нет ретраев/backoff при 429.
 
 Если после локального теста всё ок — можно постепенно дотягивать до полноценной
-ноды (tool calling, streaming, retries) и уже потом думать про публикацию в npm /
+ноды (streaming, retries, обработка ошибок) и уже потом думать про публикацию в npm /
 подачу на Verified Community Nodes.

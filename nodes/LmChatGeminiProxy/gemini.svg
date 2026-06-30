@@ -1,4 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <circle cx="12" cy="12" r="11" fill="#1a73e8"/>
-  <path d="M12 6l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Gemini-style four-point star, Google color gradient -->
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="35%" stop-color="#9B72CB"/>
+      <stop offset="70%" stop-color="#D96570"/>
+      <stop offset="100%" stop-color="#F2B400"/>
+    </linearGradient>
+  </defs>
+  <path
+    d="M24 4
+       C24 14 14 24 4 24
+       C14 24 24 34 24 44
+       C24 34 34 24 44 24
+       C34 24 24 14 24 4 Z"
+    fill="url(#g1)"
+  />
+  <!-- Proxy badge: small circular arrows icon, bottom-right corner -->
+  <circle cx="37" cy="37" r="10" fill="#1a1a1a" stroke="#fff" stroke-width="1.5"/>
+  <path
+    d="M33 35a4.2 4.2 0 0 1 6.8-2.6M41 39a4.2 4.2 0 0 1-6.8 2.6"
+    stroke="#34D399"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <path d="M39.5 31.8l.5 1.8-1.8.4" stroke="#34D399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M34.5 42.2l-.5-1.8 1.8-.4" stroke="#34D399" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

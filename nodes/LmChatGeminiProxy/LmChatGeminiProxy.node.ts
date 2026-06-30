@@ -50,7 +50,7 @@ export class LmChatGeminiProxy implements INodeType {
 				displayName: 'Max Output Tokens',
 				name: 'maxOutputTokens',
 				type: 'number',
-				default: 2048,
+				default: 8192,
 			},
 		],
 	};
