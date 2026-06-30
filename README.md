@@ -26,21 +26,27 @@ MVP для локального теста на собственном n8n. Не
 
 ## Установка одной командой (Docker)
 
-Если n8n запущен в Docker, на сервере выполни:
+Скрипт сам найдёт запущенный контейнер с n8n (по имени образа `n8nio/n8n`, а если
+не найдёт — по имени/команде, содержащей "n8n"), проверит, что внутри
+действительно есть бинарник `n8n` (чтобы случайно не залезть не в тот контейнер),
+и только после этого начнёт установку:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash -s -- <имя_контейнера_n8n>
+curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash
 ```
 
-Например, если контейнер называется `n8n`:
+Если на сервере несколько контейнеров, подходящих под критерии (например, тестовый
+и боевой n8n) — скрипт не будет гадать, а выведет список и попросит указать имя
+явно вторым аргументом:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash -s -- n8n
+curl -fsSL https://raw.githubusercontent.com/OneDimon/n8n-nodes-gemini-proxy/main/install.sh | bash -s -- <имя_контейнера>
 ```
 
-Скрипт сам: клонирует репозиторий → ставит зависимости → собирает TypeScript в JS →
-копирует результат в `/home/node/.n8n/custom/` внутри контейнера → ставит туда
-рантайм-зависимости (axios, proxy-agent) → перезапускает контейнер.
+Скрипт сам: находит контейнер → клонирует репозиторий → ставит зависимости →
+собирает TypeScript в JS → копирует результат в `/home/node/.n8n/custom/` внутри
+контейнера → ставит туда рантайм-зависимости (axios, proxy-agent) → перезапускает
+контейнер.
 
 После этого в поиске нод в n8n UI появится **"Gemini Chat Model (Proxy)"** — ничего
 руками собирать не нужно.
