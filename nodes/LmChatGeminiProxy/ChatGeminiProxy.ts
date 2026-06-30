@@ -130,6 +130,53 @@ function toolToFunctionDeclaration(tool: StructuredToolInterface): GeminiFunctio
 	};
 }
 
+// Retries with exponential backoff on transient failures (429 / 5xx / network resets),
+// mirroring how the official Google SDK-based node behaves. Auth/validation errors
+// (4xx other than 429) are not retried — they won't succeed on a second try.
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function toFriendlyError(err: unknown): Error {
+	const e = err as {
+		response?: { status?: number; data?: { error?: { message?: string } } };
+		code?: string;
+		message?: string;
+	};
+	const status = e?.response?.status;
+	const apiMessage = e?.response?.data?.error?.message;
+
+	if (status === 401 || status === 403) {
+		return new Error(
+			`Gemini API ключ отклонён (HTTP ${status}). Проверь API Key в credential. ${apiMessage ?? ''}`.trim(),
+		);
+	}
+	if (status === 429) {
+		return new Error(`Gemini API: превышен лимит запросов (429). ${apiMessage ?? ''}`.trim());
+	}
+	if (status === 400) {
+		return new Error(
+			`Gemini API: некорректный запрос (400). ${apiMessage ?? 'Проверь имя модели и параметры.'}`,
+		);
+	}
+	if (status && status >= 500) {
+		return new Error(`Gemini API временно недоступен (HTTP ${status}). ${apiMessage ?? ''}`.trim());
+	}
+	if (e?.code === 'ECONNREFUSED') {
+		return new Error(
+			'Не удалось подключиться к прокси/API (ECONNREFUSED). Проверь, что прокси запущен и доступен из контейнера n8n.',
+		);
+	}
+	if (e?.code === 'ETIMEDOUT' || e?.code === 'ECONNABORTED') {
+		return new Error('Превышено время ожидания ответа от Gemini API (таймаут).');
+	}
+	return err instanceof Error ? err : new Error(String(err));
+}
+
 export class ChatGeminiProxy extends BaseChatModel {
 	apiKey: string;
 	model: string;
@@ -257,11 +304,32 @@ export class ChatGeminiProxy extends BaseChatModel {
 		}
 
 		const client = await this.getClient();
-		const { data } = await client.post(url, body, {
-			headers: { 'Content-Type': 'application/json' },
-		});
 
-		const parts: Array<Record<string, unknown>> = data?.candidates?.[0]?.content?.parts ?? [];
+		let lastError: unknown;
+		let data: unknown;
+		for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+			try {
+				const response = await client.post(url, body, {
+					headers: { 'Content-Type': 'application/json' },
+				});
+				data = response.data;
+				lastError = undefined;
+				break;
+			} catch (err) {
+				lastError = err;
+				const status = (err as { response?: { status?: number } })?.response?.status;
+				const isRetryable = status ? RETRYABLE_STATUS.has(status) : true; // network errors: also retry
+				if (!isRetryable || attempt === MAX_RETRIES) break;
+				const delay = BASE_DELAY_MS * 2 ** attempt;
+				await sleep(delay);
+			}
+		}
+		if (lastError) throw toFriendlyError(lastError);
+
+		const typedData = data as {
+			candidates?: Array<{ content?: { parts?: Array<Record<string, unknown>> } }>;
+		};
+		const parts: Array<Record<string, unknown>> = typedData?.candidates?.[0]?.content?.parts ?? [];
 		const textParts = parts
 			.filter((p): p is { text: string } => typeof p.text === 'string')
 			.map((p) => p.text);
