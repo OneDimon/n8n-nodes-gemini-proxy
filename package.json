@@ -1,0 +1,31 @@
+{
+  "name": "n8n-nodes-gemini-proxy",
+  "version": "0.1.0",
+  "description": "Gemini Chat Model node for n8n with working SOCKS5/HTTP proxy support (bypasses Google SDK proxy bug)",
+  "keywords": ["n8n-community-node-package"],
+  "license": "MIT",
+  "author": "Dmitry (OneDimon)",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && cp -r credentials/*.svg dist/credentials/ 2>/dev/null || true",
+    "dev": "n8n-node dev",
+    "lint": "tsc --noEmit"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["dist/credentials/GeminiProxyApi.credentials.js"],
+    "nodes": ["dist/nodes/LmChatGeminiProxy/LmChatGeminiProxy.node.js"]
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "n8n-workflow": "^1.70.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "axios": "^1.7.0",
+    "https-proxy-agent": "^7.0.0",
+    "socks-proxy-agent": "^8.0.0"
+  }
+}
