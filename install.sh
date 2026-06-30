@@ -96,14 +96,14 @@ if [ "$MODE" = "docker" ]; then
     -v "$TMP_DIR/n8n-nodes-gemini-proxy:/work" \
     -w /work \
     node:20-alpine \
-    sh -c "npm install --no-audit --no-fund && npm run build"
+    sh -c "npm install --no-audit --no-fund --ignore-scripts && npm run build"
 else
   if ! command -v npm >/dev/null 2>&1; then
     echo "Системная установка n8n найдена, но на хосте нет npm — собрать пакет нечем."
     exit 1
   fi
   echo "==> Собираю пакет локальным npm (системный режим)..."
-  npm install --no-audit --no-fund
+  npm install --no-audit --no-fund --ignore-scripts
   npm run build
 fi
 
